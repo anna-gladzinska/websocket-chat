@@ -4,6 +4,7 @@ const messagesList = document.getElementById('messages-list');
 const addMessageForm = document.getElementById('add-messages-form');
 const userNameInput = document.getElementById('username');
 const messageContentInput = document.getElementById('message-content');
+const socket = io();
 
 let userName;
 
@@ -15,6 +16,10 @@ const login = (e) => {
         userName = userNameInput.value;
         loginForm.classList.remove('show');
         messagesSection.classList.add('show');
+        socket.emit('join', {
+            id: socket.id,
+            user: userName
+        });
     }
 }
 
@@ -24,6 +29,10 @@ const sendMessage = (e) => {
         window.alert("Write something!");
     } else {
         addMessage(userName, messageContentInput.value);
+        socket.emit('message', {
+            author: userName,
+            content: messageContentInput.value
+        });
         messageContentInput.value = "";
     }
 }
@@ -46,3 +55,18 @@ const addMessage = (author, content) => {
 
 loginForm.addEventListener('submit', login);
 addMessageForm.addEventListener('submit', sendMessage);
+
+socket.on('message', ({
+    author,
+    content
+}) => addMessage(author, content));
+
+socket.on('newUser', ({
+    author,
+    content
+}) => addMessage(author, content));
+
+socket.on('removeUser', ({
+    author,
+    content
+}) => addMessage(author, content));
